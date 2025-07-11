@@ -4,6 +4,7 @@ go 1.24.5
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
+	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/pmorelli92/demo-rabbitmq-streams/customer/api v0.0.0-20250711085444-3c4d487f5015
 	github.com/prometheus/client_golang v1.22.0

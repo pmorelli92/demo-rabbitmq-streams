@@ -11,6 +11,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getCustomerByID = `-- name: GetCustomerByID :one
+SELECT id, address FROM customers WHERE id = $1
+`
+
+type GetCustomerByIDRow struct {
+	ID      string
+	Address string
+}
+
+func (q *Queries) GetCustomerByID(ctx context.Context, id string) (GetCustomerByIDRow, error) {
+	row := q.db.QueryRow(ctx, getCustomerByID, id)
+	var i GetCustomerByIDRow
+	err := row.Scan(&i.ID, &i.Address)
+	return i, err
+}
+
 const upsertCustomer = `-- name: UpsertCustomer :exec
 INSERT INTO customers(id, address, updated_at)
 VALUES ($1, $2, $3)

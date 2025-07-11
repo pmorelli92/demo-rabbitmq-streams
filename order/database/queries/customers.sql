@@ -5,3 +5,6 @@ ON CONFLICT (id) DO UPDATE SET
     address = EXCLUDED.address,
     updated_at = EXCLUDED.updated_at
 WHERE EXCLUDED.updated_at > customers.updated_at;
+
+-- name: GetCustomerByID :one
+SELECT id, address FROM customers WHERE id = $1;

@@ -13,3 +13,9 @@ type Customer struct {
 	Address   string
 	UpdatedAt pgtype.Timestamptz
 }
+
+type Order struct {
+	ID         string
+	CustomerID string
+	Status     string
+}
