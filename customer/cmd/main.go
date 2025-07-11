@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/pmorelli92/demo-rabbitmq-streams/app"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/app"
 )
 
 func main() {

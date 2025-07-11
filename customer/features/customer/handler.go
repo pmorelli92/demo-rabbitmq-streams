@@ -9,9 +9,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pmorelli92/demo-rabbitmq-streams/api"
-	gen_sql "github.com/pmorelli92/demo-rabbitmq-streams/database/generated"
-	"github.com/pmorelli92/demo-rabbitmq-streams/metrics"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/api"
+	gen_sql "github.com/pmorelli92/demo-rabbitmq-streams/customer/database/generated"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/metrics"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/ha"
 )

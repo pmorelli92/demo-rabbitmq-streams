@@ -1,14 +1,14 @@
-module github.com/pmorelli92/demo-rabbitmq-streams
+module github.com/pmorelli92/demo-rabbitmq-streams/customer
 
 go 1.24.5
 
-replace github.com/pmorelli92/demo-rabbitmq-streams/api => ./api
+replace github.com/pmorelli92/demo-rabbitmq-streams/customer/api => ./api
 
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/pmorelli92/demo-rabbitmq-streams/api v0.0.0-20241002120000-abcdef123456
+	github.com/pmorelli92/demo-rabbitmq-streams/customer/api v0.0.0-20241002120000-abcdef123456
 	github.com/prometheus/client_golang v1.22.0
 	github.com/rabbitmq/rabbitmq-stream-go-client v1.5.8
 )
