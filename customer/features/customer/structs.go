@@ -11,7 +11,7 @@ type updateAddressRq struct {
 }
 
 type customerRs struct {
-	CustomerID string `json:"customerId"`
+	CustomerID string `json:"customer_id"`
 	Name       string `json:"name"`
 	Email      string `json:"email"`
 	Address    string `json:"address"`

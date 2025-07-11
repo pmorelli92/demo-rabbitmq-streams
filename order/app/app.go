@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,11 +10,10 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pmorelli92/demo-rabbitmq-streams/customer/api"
-	"github.com/pmorelli92/demo-rabbitmq-streams/customer/database"
-	"github.com/pmorelli92/demo-rabbitmq-streams/customer/env"
-	"github.com/pmorelli92/demo-rabbitmq-streams/customer/features/customer"
-	"github.com/pmorelli92/demo-rabbitmq-streams/customer/metrics"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/database"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/env"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/features/customer_sync"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
@@ -56,19 +54,12 @@ func Run(ctx context.Context) {
 		logFatal(logger, err)
 	}
 
-	err = streamEnv.DeclareStream(api.StreamName, &stream.StreamOptions{
-		MaxLengthBytes: stream.ByteCapacity{}.GB(1),
-	})
-	if err != nil && !errors.Is(err, stream.StreamAlreadyExists) {
-		logFatal(logger, err)
-	}
-
 	metrics.New()
 	mux := http.NewServeMux()
 
 	// Features
 	{
-		err = customer.Setup(db, logger, streamEnv, mux)
+		err := customer_sync.Setup(e, db, logger, streamEnv)
 		if err != nil {
 			logFatal(logger, err)
 		}
