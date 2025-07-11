@@ -1,0 +1,61 @@
+<svg width="600" height="450" xmlns="http://www.w3.org/2000/svg">
+  <!-- White Background -->
+  <rect width="100%" height="100%" fill="white"/>
+  
+  <defs>
+    <style>
+      .service-box { fill: #E3F2FD; stroke: #1976D2; stroke-width: 2; }
+      .stream-box { fill: #E8F5E8; stroke: #388E3C; stroke-width: 2; }
+      .active-service { fill: #C8E6C9; stroke: #2E7D32; stroke-width: 3; }
+      .standby-service { fill: #FFECB3; stroke: #F57C00; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .title { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .active-arrow { stroke: #2E7D32; stroke-width: 3; fill: none; marker-end: url(#activehead); }
+      .standby-arrow { stroke: #F57C00; stroke-width: 2; fill: none; stroke-dasharray: 5,5; marker-end: url(#standbyhead); }
+    </style>
+    <marker id="activehead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2E7D32" />
+    </marker>
+    <marker id="standbyhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F57C00" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="300" y="25" class="title" font-size="18">Single Active Consumer Pattern</text>
+  
+  <!-- RabbitMQ Stream -->
+  <rect x="220" y="80" width="160" height="120" class="stream-box" rx="10"/>
+  <text x="300" y="105" class="title">RabbitMQ Streams</text>
+  <text x="300" y="125" class="text">Stream: "customer"</text>
+  <text x="300" y="145" class="text">Consumer Group:</text>
+  <text x="300" y="160" class="text">"order-service"</text>
+  <text x="300" y="185" class="text">Only ONE active consumer</text>
+  
+  <!-- Order Service 1 (Active) -->
+  <rect x="50" y="250" width="140" height="100" class="active-service" rx="10"/>
+  <text x="120" y="275" class="title">Order Service #1</text>
+  <text x="120" y="295" class="text">Port: 8081</text>
+  <text x="120" y="315" class="text" fill="#2E7D32" font-weight="bold">ACTIVE CONSUMER</text>
+  <text x="120" y="335" class="text">Processing messages</text>
+  
+  <!-- Order Service 2 (Standby) -->
+  <rect x="410" y="250" width="140" height="100" class="standby-service" rx="10"/>
+  <text x="480" y="275" class="title">Order Service #2</text>
+  <text x="480" y="295" class="text">Port: 8082</text>
+  <text x="480" y="315" class="text" fill="#F57C00" font-weight="bold">STANDBY</text>
+  <text x="480" y="335" class="text">Ready for failover</text>
+  
+  <!-- Active Connection Arrow -->
+  <line x1="220" y1="160" x2="170" y2="250" class="active-arrow"/>
+  <text x="150" y="210" class="text" font-size="10" fill="#2E7D32">Active Connection</text>
+  
+  <!-- Standby Connection Arrow (dashed) -->
+  <line x1="380" y1="160" x2="430" y2="250" class="standby-arrow"/>
+  <text x="450" y="210" class="text" font-size="10" fill="#F57C00">Standby Connection</text>
+  
+  <!-- Failover explanation -->
+  <rect x="120" y="370" width="360" height="35" fill="#FFF9C4" stroke="#F9A825" stroke-width="1" rx="5"/>
+  <text x="300" y="385" class="text" font-size="11">If Service #1 fails, Service #2 automatically becomes active</text>
+  <text x="300" y="398" class="text" font-size="10">Automatic failover with offset recovery ensures no message loss</text>
+</svg>
