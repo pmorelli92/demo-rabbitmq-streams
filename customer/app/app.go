@@ -11,11 +11,11 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pmorelli92/demo-rabbitmq-streams/api"
-	"github.com/pmorelli92/demo-rabbitmq-streams/database"
-	"github.com/pmorelli92/demo-rabbitmq-streams/env"
-	"github.com/pmorelli92/demo-rabbitmq-streams/features/customer"
-	"github.com/pmorelli92/demo-rabbitmq-streams/metrics"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/api"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/database"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/env"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/features/customer"
+	"github.com/pmorelli92/demo-rabbitmq-streams/customer/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
