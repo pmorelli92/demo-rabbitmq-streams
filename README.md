@@ -1,10 +1,10 @@
 # RabbitMQ Streams Demo with Golang
 
-## Purpose
+## 🎯 Purpose
 
 This repository demonstrates **event-driven microservices architecture** using **RabbitMQ Streams** for reliable event streaming and **eventual consistency** between services. It showcases how services can maintain their own data while staying synchronized through events, providing a production-ready pattern for distributed systems.
 
-## Architecture
+## 🏗️ Architecture
 
 ![Architecture Overview](./diagrams/architecture-overview.svg)
 
@@ -12,7 +12,7 @@ This repository demonstrates **event-driven microservices architecture** using *
 
 ![Single Active Consumer Pattern](./diagrams/single-active-consumer.svg)
 
-## Features
+## 🚀 Features
 
 - Source of truth in streams.
 - Automatic synchronization through events.
@@ -20,12 +20,7 @@ This repository demonstrates **event-driven microservices architecture** using *
 - Automatic failover for consumers.
 - Reliable producer and consumers for network intermittency or downtime with RabbitMQ.
 
-### 🧪 **Testing Suite**
-- **End-to-End Tests** demonstrating complete flow
-- **Load Testing** with 100k customer simulation
-- **Database Validation** for consistency verification
-
-## How to Run
+## 🧪 Testing Suite
 
 You need to have both `docker` and `go` installed to run the demo.
 
