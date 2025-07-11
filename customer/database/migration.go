@@ -27,5 +27,9 @@ func Migrate(databaseURL string) error {
 		return fmt.Errorf("could not apply migrations: %w", err)
 	}
 
-	return nil
+	errSource, errDb := m.Close()
+	if errSource != nil {
+		return errSource
+	}
+	return errDb
 }

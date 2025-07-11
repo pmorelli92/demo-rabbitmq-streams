@@ -13,6 +13,7 @@ import (
 	"github.com/pmorelli92/demo-rabbitmq-streams/order/database"
 	"github.com/pmorelli92/demo-rabbitmq-streams/order/env"
 	"github.com/pmorelli92/demo-rabbitmq-streams/order/features/customer_sync"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/features/order"
 	"github.com/pmorelli92/demo-rabbitmq-streams/order/metrics"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
@@ -63,6 +64,8 @@ func Run(ctx context.Context) {
 		if err != nil {
 			logFatal(logger, err)
 		}
+
+		order.Setup(db, logger, mux)
 	}
 
 	mux.Handle("/metrics", promhttp.Handler())

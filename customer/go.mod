@@ -11,6 +11,7 @@ require (
 	github.com/pmorelli92/demo-rabbitmq-streams/customer/api v0.0.0-20241002120000-abcdef123456
 	github.com/prometheus/client_golang v1.22.0
 	github.com/rabbitmq/rabbitmq-stream-go-client v1.5.8
+	go.uber.org/goleak v1.3.0
 )
 
 require (
