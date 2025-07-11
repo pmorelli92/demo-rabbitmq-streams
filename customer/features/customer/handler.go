@@ -136,7 +136,7 @@ func (h handler) publishEvent(id string, eventType, event any) error {
 		"event_type": eventType,
 	}
 
-	err = h.producer.Send(amqp.NewMessage(eventData))
+	err = h.producer.Send(msg)
 	if err != nil {
 		metrics.EventPublishErrors.Inc()
 		return err

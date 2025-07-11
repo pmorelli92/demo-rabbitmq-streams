@@ -55,3 +55,49 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+
+  order1:
+    build: ./order
+    ports:
+      - "8080:8080"
+    environment:
+      - HTTP_ADDRESS=:8080
+      - HTTP_TIMEOUT=5s
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5552
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - RABBITMQ_CONSUMER_NAME=order-service
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=order_db
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  order2:
+    build: ./order
+    ports:
+      - "8080:8080"
+    environment:
+      - HTTP_ADDRESS=:8080
+      - HTTP_TIMEOUT=5s
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5552
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - RABBITMQ_CONSUMER_NAME=order-service
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=order_db
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
