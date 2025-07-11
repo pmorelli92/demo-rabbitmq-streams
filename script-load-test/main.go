@@ -60,16 +60,16 @@ func main() {
 
 	// Create 100k customers with rate limiting
 	const totalCustomers = 100000
-	const rateLimit = 20 * time.Millisecond
+	const rateLimit = 25 * time.Millisecond
 
 	log.Printf("Starting to create %d customers...", totalCustomers)
 
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 25) // Limit concurrent requests
+	sem := make(chan struct{}, 20) // Limit concurrent requests
 
 	start := time.Now()
 
-	for i := 0; i < totalCustomers; i++ {
+	for i := range totalCustomers {
 		wg.Add(1)
 		go func(customerNum int) {
 			defer wg.Done()
