@@ -82,6 +82,7 @@ func Run(ctx context.Context) {
 	}
 
 	go func() {
+		logger.Info("starting HTTP server", "address", e.HTTPAddress)
 		serverErrors <- httpServer.ListenAndServe()
 	}()
 

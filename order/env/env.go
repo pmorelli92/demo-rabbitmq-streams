@@ -2,18 +2,27 @@ package env
 
 import (
 	"errors"
+	"fmt"
+	"net/url"
 	"os"
 	"strconv"
+	"time"
 )
 
 type Env struct {
-	HTTPServerAddress string
-	RabbitMQHost      string
-	RabbitMQPort      int
-	RabbitMQUser      string
-	RabbitMQPassword  string
-	ConsumerName      string
-	DB                DBConfig
+	HTTPAddress         string
+	HTTPTimeout         time.Duration
+	RabbitMQ            RabbitMQ
+	DBConnectionDSN     string
+	DBConnectionMigrate string
+}
+
+type RabbitMQ struct {
+	Host         string
+	Port         int
+	User         string
+	Password     string
+	ConsumerName string
 }
 
 type DBConfig struct {
@@ -27,41 +36,76 @@ type DBConfig struct {
 
 func ParseEnv() (Env, error) {
 	e := Env{}
+	dbConn := dbConnection{}
+
 	err := errors.Join(
-		parseKey("HTTP_SERVER_ADDRESS", &e.HTTPServerAddress),
-		parseKey("RABBITMQ_HOST", &e.RabbitMQHost),
-		parseInt("RABBITMQ_PORT", &e.RabbitMQPort),
-		parseKey("RABBITMQ_USER", &e.RabbitMQUser),
-		parseKey("RABBITMQ_PASSWORD", &e.RabbitMQPassword),
-		parseKey("CONSUMER_NAME", &e.ConsumerName),
-		parseKey("DB_HOST", &e.DB.Host),
-		parseInt("DB_PORT", &e.DB.Port),
-		parseKey("DB_USER", &e.DB.User),
-		parseKey("DB_PASSWORD", &e.DB.Password),
-		parseKey("DB_NAME", &e.DB.Database),
-		parseKey("DB_SSL_MODE", &e.DB.SSLMode),
+		parseKey("HTTP_ADDRESS", &e.HTTPAddress),
+		parseDuration("HTTP_TIMEOUT", &e.HTTPTimeout),
+		parseKey("RABBITMQ_HOST", &e.RabbitMQ.Host),
+		parseInt("RABBITMQ_PORT", &e.RabbitMQ.Port),
+		parseKey("RABBITMQ_USER", &e.RabbitMQ.User),
+		parseKey("RABBITMQ_PASSWORD", &e.RabbitMQ.Password),
+		parseKey("RABBITMQ_CONSUMER_NAME", &e.RabbitMQ.ConsumerName),
+		parseKey("DB_HOST", &dbConn.host),
+		parseKey("DB_USER", &dbConn.user),
+		parseKey("DB_PASSWORD", &dbConn.password),
+		parseKey("DB_PORT", &dbConn.port),
+		parseKey("DB_NAME", &dbConn.name),
 	)
+
+	e.DBConnectionMigrate = dbConn.getConn("pgx5")
+	e.DBConnectionDSN = dbConn.getConn("postgresql")
 	return e, err
 }
 
-func parseKey(key string, target *string) error {
-	value := os.Getenv(key)
-	if value == "" {
-		return errors.New("missing required environment variable: " + key)
+func parseKey(envKey string, field *string) error {
+	val := os.Getenv(envKey)
+	if val == "" {
+		return fmt.Errorf("%s env var is not set", envKey)
 	}
-	*target = value
+
+	*field = val
 	return nil
 }
 
-func parseInt(key string, target *int) error {
-	value := os.Getenv(key)
+func parseInt(envKey string, field *int) error {
+	value := os.Getenv(envKey)
 	if value == "" {
-		return errors.New("missing required environment variable: " + key)
+		return fmt.Errorf("%s env var is not set", envKey)
 	}
+
 	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		return errors.New("invalid integer value for " + key + ": " + value)
+	*field = parsed
+	return err
+}
+
+func parseDuration(envKey string, field *time.Duration) error {
+	durationStr := ""
+	if err := parseKey(envKey, &durationStr); err != nil {
+		return err
 	}
-	*target = parsed
-	return nil
+
+	var err error
+	*field, err = time.ParseDuration(durationStr)
+	return err
+}
+
+type dbConnection struct {
+	host     string
+	user     string
+	password string
+	port     string
+	name     string
+}
+
+func (db dbConnection) getConn(driver string) string {
+	return fmt.Sprintf(
+		"%s://%s:%s@%s:%s/%s",
+		driver,
+		db.user,
+		url.QueryEscape(db.password),
+		db.host,
+		db.port,
+		db.name,
+	)
 }

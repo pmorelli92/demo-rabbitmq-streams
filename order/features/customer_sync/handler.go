@@ -2,43 +2,75 @@ package customer_sync
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 	customerapi "github.com/pmorelli92/demo-rabbitmq-streams/customer/api"
+	gen_sql "github.com/pmorelli92/demo-rabbitmq-streams/order/database/generated"
+	"github.com/pmorelli92/demo-rabbitmq-streams/order/metrics"
+	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 )
 
-func (h *handler) processCustomerEvent(ctx context.Context, event CustomerEvent) error {
+type handler struct {
+	db     *pgxpool.Pool
+	logger *slog.Logger
+}
+
+func (h handler) consume(ctx context.Context, message *amqp.Message) error {
+	var event customerapi.CustomerEvent
+	if err := json.Unmarshal(message.Data[0], &event); err != nil {
+		metrics.CustomerEventErrors.Inc()
+		return err
+	}
+
 	switch event.EventType {
 	case customerapi.CustomerCreated:
-		fmt.Println("Processing CustomerCreated event")
-		return h.handleCustomerCreated(ctx, event)
+		evt, ok := event.Data.(customerapi.CustomerCreatedEvent)
+		if !ok {
+			metrics.CustomerEventErrors.Inc()
+			return fmt.Errorf("invalid event data type for %s", event.EventType)
+		}
+		return h.update(ctx, event.CustomerID, evt.Address, event.Timestamp)
+
 	case customerapi.CustomerAddressUpdated:
-		fmt.Println("Processing CustomerAddressUpdated event")
-		return h.handleCustomerAddressUpdated(ctx, event)
+		evt, ok := event.Data.(customerapi.CustomerAddressUpdatedEvent)
+		if !ok {
+			metrics.CustomerEventErrors.Inc()
+			return fmt.Errorf("invalid event data type for %s", event.EventType)
+		}
+		return h.update(ctx, event.CustomerID, evt.Address, event.Timestamp)
+
 	default:
-		log.Printf("Unknown customer event type: %s", event.EventType)
-		return nil
+		metrics.CustomerEventErrors.Inc()
+		return fmt.Errorf("unknown event type: %s", event.EventType)
 	}
 }
 
-func (h *handler) handleCustomerCreated(ctx context.Context, event CustomerEvent) error {
-	data := event.Data.(map[string]interface{})
-	customer := Customer{
-		ID:        event.CustomerID,
-		Name:      data["name"].(string),
-		Email:     data["email"].(string),
-		Address:   data["address"].(string),
-		CreatedAt: event.Timestamp,
-		UpdatedAt: event.Timestamp,
+func (h handler) update(
+	ctx context.Context,
+	customerID, address string,
+	updatedAt time.Time) error {
+
+	q := gen_sql.New(h.db)
+	err := q.UpsertCustomer(ctx, gen_sql.UpsertCustomerParams{
+		ID:      customerID,
+		Address: address,
+		UpdatedAt: pgtype.Timestamptz{
+			Time:  updatedAt,
+			Valid: true,
+		},
+	})
+
+	if err != nil {
+		metrics.CustomerEventErrors.Inc()
+		return err
 	}
 
-	return h.upsertCustomer(ctx, customer)
-}
-
-func (h *handler) handleCustomerAddressUpdated(ctx context.Context, event CustomerEvent) error {
-	data := event.Data.(map[string]interface{})
-	newAddress := data["new_address"].(string)
-
-	return h.updateCustomerAddress(ctx, event.CustomerID, newAddress)
+	metrics.CustomersProcessed.Inc()
+	h.logger.Info("customer updated", "customerId", customerID)
+	return nil
 }
