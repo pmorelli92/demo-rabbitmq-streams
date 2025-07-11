@@ -1,7 +1,6 @@
 package order
 
 type createOrderRq struct {
-	Name       string `json:"name"`
 	CustomerID string `json:"customer_id"`
 }
 

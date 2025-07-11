@@ -27,6 +27,8 @@ func (h httpHandler) createOrder(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(rs)
+	case ErrNotFound:
+		w.WriteHeader(http.StatusBadRequest)
 	default:
 		h.logger.ErrorContext(ctx, err.Error())
 		http.Error(w, "unexpected error", http.StatusInternalServerError)
@@ -41,8 +43,10 @@ func (h httpHandler) getOrderByID(w http.ResponseWriter, r *http.Request) {
 	switch err {
 	case nil:
 		w.Header().Set("Content-type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(rs)
+	case ErrNotFound:
+		w.WriteHeader(http.StatusNotFound)
 	default:
 		h.logger.ErrorContext(ctx, err.Error())
 		http.Error(w, "unexpected error", http.StatusInternalServerError)
