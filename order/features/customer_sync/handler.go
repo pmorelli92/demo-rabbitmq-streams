@@ -21,32 +21,32 @@ type handler struct {
 }
 
 func (h handler) consume(ctx context.Context, message *amqp.Message) error {
-	var event customerapi.CustomerEvent
-	if err := json.Unmarshal(message.Data[0], &event); err != nil {
+	eventType, ok := message.Annotations["event_type"]
+	if !ok {
 		metrics.CustomerEventErrors.Inc()
-		return err
+		return fmt.Errorf("event_type annotation not found in message")
 	}
 
-	switch event.EventType {
+	switch eventType {
 	case customerapi.CustomerCreated:
 		evt := customerapi.CustomerCreatedEvent{}
-		if err := json.Unmarshal(event.Data.([]byte), &evt); err != nil {
+		if err := json.Unmarshal(message.Data[0], &evt); err != nil {
 			metrics.CustomerEventErrors.Inc()
-			return fmt.Errorf("invalid event data type for %s", event.EventType)
+			return err
 		}
-		return h.update(ctx, event.CustomerID, evt.Address, event.Timestamp)
+		return h.update(ctx, evt.CustomerID, evt.Address, evt.Timestamp)
 
 	case customerapi.CustomerAddressUpdated:
 		evt := customerapi.CustomerAddressUpdatedEvent{}
-		if err := json.Unmarshal(event.Data.([]byte), &evt); err != nil {
+		if err := json.Unmarshal(message.Data[0], &evt); err != nil {
 			metrics.CustomerEventErrors.Inc()
-			return fmt.Errorf("invalid event data type for %s", event.EventType)
+			return err
 		}
-		return h.update(ctx, event.CustomerID, evt.Address, event.Timestamp)
+		return h.update(ctx, evt.CustomerID, evt.Address, evt.Timestamp)
 
 	default:
 		metrics.CustomerEventErrors.Inc()
-		return fmt.Errorf("unknown event type: %s", event.EventType)
+		return fmt.Errorf("unknown event type: %s", eventType)
 	}
 }
 
