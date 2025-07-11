@@ -1,7 +1,6 @@
 package customer
 
 import (
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -20,15 +19,7 @@ func Setup(
 	producer, err := ha.NewReliableProducer(
 		streamEnv, api.StreamName,
 		stream.NewProducerOptions(),
-		func(messageConfirm []*stream.ConfirmationStatus) {
-			for _, msg := range messageConfirm {
-				if msg.IsConfirmed() {
-					fmt.Printf("message %s confirmed \n", msg.GetMessage().GetData())
-				} else {
-					fmt.Printf("message %s failed \n", msg.GetMessage().GetData())
-				}
-			}
-		})
+		func(messageConfirm []*stream.ConfirmationStatus) {})
 	if err != nil {
 		return err
 	}
