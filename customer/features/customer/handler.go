@@ -49,17 +49,16 @@ func (h *handler) createCustomer(ctx context.Context, rq createCustomerRq) (cust
 		return customerRs{}, err
 	}
 
-	err = h.publishEvent(api.CustomerEvent{
-		EventID:    uuid.NewString(),
-		EventType:  api.CustomerCreated,
-		CustomerID: customerID,
-		Timestamp:  time.Now(),
-		Data: api.CustomerCreatedEvent{
-			Name:    rq.Name,
-			Email:   rq.Email,
-			Address: rq.Address,
-		},
-	})
+	err = h.publishEvent(
+		uuid.NewString(),
+		api.CustomerAddressUpdated,
+		api.CustomerCreatedEvent{
+			CustomerID: customerID,
+			Timestamp:  time.Now(),
+			Name:       rq.Name,
+			Email:      rq.Email,
+			Address:    rq.Address,
+		})
 	if err != nil {
 		return customerRs{}, err
 	}
@@ -100,15 +99,14 @@ func (h *handler) updateCustomerAddress(ctx context.Context, customerID string, 
 		return customerRs{}, err
 	}
 
-	err = h.publishEvent(api.CustomerEvent{
-		EventID:    uuid.NewString(),
-		EventType:  api.CustomerCreated,
-		CustomerID: customerID,
-		Timestamp:  time.Now(),
-		Data: api.CustomerAddressUpdatedEvent{
-			Address: rq.Address,
-		},
-	})
+	err = h.publishEvent(
+		uuid.NewString(),
+		api.CustomerAddressUpdated,
+		api.CustomerAddressUpdatedEvent{
+			Address:    rq.Address,
+			CustomerID: customerID,
+			Timestamp:  time.Now(),
+		})
 	if err != nil {
 		return customerRs{}, err
 	}
@@ -125,11 +123,17 @@ func (h *handler) updateCustomerAddress(ctx context.Context, customerID string, 
 	}, nil
 }
 
-func (h handler) publishEvent(event api.CustomerEvent) error {
+func (h handler) publishEvent(id string, eventType, event any) error {
 	eventData, err := json.Marshal(event)
 	if err != nil {
 		metrics.EventPublishErrors.Inc()
 		return err
+	}
+
+	msg := amqp.NewMessage(eventData)
+	msg.Annotations = map[any]any{
+		"event_id":   id,
+		"event_type": eventType,
 	}
 
 	err = h.producer.Send(amqp.NewMessage(eventData))

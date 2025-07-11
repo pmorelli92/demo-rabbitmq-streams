@@ -29,16 +29,16 @@ func (h handler) consume(ctx context.Context, message *amqp.Message) error {
 
 	switch event.EventType {
 	case customerapi.CustomerCreated:
-		evt, ok := event.Data.(customerapi.CustomerCreatedEvent)
-		if !ok {
+		evt := customerapi.CustomerCreatedEvent{}
+		if err := json.Unmarshal(event.Data.([]byte), &evt); err != nil {
 			metrics.CustomerEventErrors.Inc()
 			return fmt.Errorf("invalid event data type for %s", event.EventType)
 		}
 		return h.update(ctx, event.CustomerID, evt.Address, event.Timestamp)
 
 	case customerapi.CustomerAddressUpdated:
-		evt, ok := event.Data.(customerapi.CustomerAddressUpdatedEvent)
-		if !ok {
+		evt := customerapi.CustomerAddressUpdatedEvent{}
+		if err := json.Unmarshal(event.Data.([]byte), &evt); err != nil {
 			metrics.CustomerEventErrors.Inc()
 			return fmt.Errorf("invalid event data type for %s", event.EventType)
 		}

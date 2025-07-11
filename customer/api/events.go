@@ -8,20 +8,16 @@ const (
 	CustomerAddressUpdated = "customer.address.updated"
 )
 
-type CustomerEvent struct {
-	EventID    string    `json:"eventId"`
-	EventType  string    `json:"eventType"`
-	Timestamp  time.Time `json:"timestamp"`
-	CustomerID string    `json:"customerId"`
-	Data       any       `json:"data"`
-}
-
 type CustomerCreatedEvent struct {
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Address string `json:"address"`
+	CustomerID string    `json:"customer_id"`
+	Name       string    `json:"name"`
+	Email      string    `json:"email"`
+	Address    string    `json:"address"`
+	Timestamp  time.Time `json:"timestamp"`
 }
 
 type CustomerAddressUpdatedEvent struct {
-	Address string `json:"address"`
+	CustomerID string    `json:"customer_id"`
+	Address    string    `json:"address"`
+	Timestamp  time.Time `json:"timestamp"`
 }
