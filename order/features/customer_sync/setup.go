@@ -9,6 +9,7 @@ import (
 	"github.com/pmorelli92/demo-rabbitmq-streams/customer/api"
 	"github.com/pmorelli92/demo-rabbitmq-streams/order/env"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
+	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/ha"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
 
@@ -34,8 +35,11 @@ func Setup(
 	}
 
 	// This could be in a lib as well
-	_, err := streamEnv.NewConsumer(
-		api.StreamName,
+	_, err := ha.NewReliableConsumer(
+		streamEnv, api.StreamName,
+		stream.NewConsumerOptions().
+			SetConsumerName(e.RabbitMQ.ConsumerName).
+			SetSingleActiveConsumer(stream.NewSingleActiveConsumer(consumerUpdate)),
 		func(consumerContext stream.ConsumerContext, message *amqp.Message) {
 			ctx, cancelCtx := context.WithTimeout(context.Background(), 5*time.Second)
 			err := handler.consume(ctx, message)
@@ -48,9 +52,6 @@ func Setup(
 				logger.Error("failed to store offset", "error", err)
 			}
 		},
-		stream.NewConsumerOptions().
-			SetConsumerName(e.RabbitMQ.ConsumerName).
-			SetSingleActiveConsumer(stream.NewSingleActiveConsumer(consumerUpdate)),
 	)
 
 	return err
